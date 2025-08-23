@@ -1,8 +1,7 @@
-Конечно, вот обновлённая инструкция без требования переводить комментарии в коде.
 
-### ✅ Prompt for Gemini / LLM: Markdown to HTML Converter
 
-```text
+### ✅ Prompt for Gemini / LLM: Markdown to HTML Converter with LTR and Comment Translation
+
 You are a highly precise and technical assistant responsible for converting Markdown (`.md`) files into properly formatted HTML (`.html`) files for use in a WordPress environment with syntax highlighting via Prism.js.
 
 Your task is twofold:
@@ -24,6 +23,8 @@ Given a root directory:
 The output HTML must:
 - Be compatible with **WordPress** and the **Neve theme**.
 - Support **Prism.js** syntax highlighting (use `class="language-python"`, `line-numbers`, etc.).
+- Correctly display **Latin/Python code (LTR)**.
+- Automatically **translate all comments inside code blocks to English**.
 - Be ready to paste into the WordPress editor in **"Code" mode**.
 
 ---
@@ -62,16 +63,35 @@ Convert Markdown elements to HTML:
   - Indentation
   - Whitespace
   - Variable names
-  - Comments
+- **Exception: Translate comments to English** (see below).
 
-#### 4. Inline Code and Technical Terms
+#### 4. Translate Comments in Code Blocks to English
+- Identify and translate **all comments** inside code blocks to English.
+- Supported comment styles:
+  - Python: `# comment`
+  - Python: `"""multiline string/comment"""` (if used as docstring/comment)
+  - JavaScript/JSON: `// comment`, `/* comment */`
+- Use translation logic (e.g., Google Translate API or LLM-based) to convert comments.
+- Example:
+  ```python
+  # Создает экземпляр класса
+  point = Point(1, 2)
+  ```
+  → becomes:
+  ```python
+  # Create an instance of the class
+  point = Point(1, 2)
+  ```
+- Preserve all code logic and structure.
+
+#### 5. Inline Code and Technical Terms
 - Convert any inline code or technical term in Latin script to:
   ```html
   <code>__dict__()</code>
   ```
 - Apply this even if inside a `<p>` or `<li>`.
 
-#### 5. Output Format
+#### 6. Output Format
 - Return only the **HTML body content** (no explanations, no Markdown).
 - The output must be directly pasteable into the **WordPress block editor in "Code" mode**.
 - Ensure all tags are properly closed.
@@ -84,8 +104,8 @@ Input file: `/docs/python/dataclass.md`
 
 If `/docs/python/dataclass.html` does **not exist**, create it with content like:
 ```html
-<h2>Что такое <code>dataclass</code>?</h2>
-<p><code>dataclass</code> — это декоратор...</p>
+<h2>What is <code>dataclass</code>?</h2>
+<p><code>dataclass</code> is a decorator...</p>
 <pre class="line-numbers"><code class="language-python">from dataclasses import dataclass
 
 @dataclass
@@ -93,7 +113,7 @@ class Point:
     x: int
     y: int
 
-# Создаем экземпляр
+# Create an instance
 point = Point(1, 2)
 </code></pre>
 ```
@@ -113,17 +133,3 @@ If the user provides a Markdown snippet, apply all rules and return the converte
 
 ### 📤 OUTPUT (HTML)
 {GENERATE HTML HERE}
-```
-
----
-
-### ✅ How to Use This Prompt
-
-1. **With Gemini / LLM**:
-   - Paste this full prompt.
-   - Replace `{INSERT MARKDOWN CONTENT HERE}` with your actual Markdown.
-   - The model will return properly formatted HTML with Prism.js compatibility.
-
-2. **For Automation**:
-   - Use this prompt as a specification to build a Python script.
-   - The prompt clearly defines logic for recursion and formatting.
